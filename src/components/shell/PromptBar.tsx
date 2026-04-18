@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUp, History } from "lucide-react";
+import { ArrowUp, History, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useClientStore, useUIStore } from "@/lib/store";
@@ -140,6 +140,16 @@ export default function PromptBar() {
             </div>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => console.log("voice input")}
+          disabled={isPending}
+          aria-label="Enregistrer un audio"
+          className="h-9 w-9 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-muted/70 hover:text-foreground transition-colors shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <Mic className="h-4 w-4" />
+        </button>
 
         <button
           onClick={send}
