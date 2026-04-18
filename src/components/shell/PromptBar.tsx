@@ -17,6 +17,9 @@ export default function PromptBar() {
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
   const qc = useQueryClient();
 
   const { data: snapshots = [] } = useClientSnapshots(clientId);
