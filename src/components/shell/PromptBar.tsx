@@ -67,7 +67,15 @@ export default function PromptBar() {
       transition={{ duration: 0.25, ease: "easeOut" }}
       className="fixed inset-x-0 bottom-6 z-40 mx-auto w-[min(760px,calc(100%-32px))]"
     >
-      <div className="bg-surface/95 backdrop-blur-xl border border-border rounded-[28px] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.18)] px-3 py-2.5 flex items-end gap-2">
+      <div className="relative bg-surface/95 backdrop-blur-xl border border-border rounded-[28px] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.18)] px-3 py-2.5 flex items-end gap-2 overflow-hidden">
+        {isPending && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 h-[2px] overflow-hidden rounded-t-[28px]"
+          >
+            <span className="block h-full w-1/3 bg-gradient-to-r from-transparent via-primary to-transparent animate-[loading-bar_1.2s_ease-in-out_infinite]" />
+          </span>
+        )}
         <Popover>
           <PopoverTrigger asChild>
             <Button
