@@ -4,10 +4,11 @@ import { ArrowUp, History, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useClientStore, useUIStore } from "@/lib/store";
-import { submitPrompt, useClientSnapshots, restoreSnapshot } from "@/lib/hooks";
+import { submitPrompt, useClientSnapshots, restoreSnapshot, submitAudio } from "@/lib/hooks";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function PromptBar() {
   const clientId = useClientStore((s) => s.selectedClientId);
@@ -16,6 +17,9 @@ export default function PromptBar() {
   const [value, setValue] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
   const qc = useQueryClient();
 
   const { data: snapshots = [] } = useClientSnapshots(clientId);
@@ -144,7 +148,51 @@ export default function PromptBar() {
 
         <button
           type="button"
-          onClick={() => setIsRecording((r) => !r)}
+          onClick={async () => {
+            if (isRecording) {
+              // Stop recording
+              const mr = mediaRecorderRef.current;
+              if (mr && mr.state !== "inactive") mr.stop();
+              return;
+            }
+            // Start recording
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              streamRef.current = stream;
+              chunksRef.current = [];
+              const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+                ? "audio/webm"
+                : "";
+              const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+              mediaRecorderRef.current = mr;
+              mr.ondataavailable = (e) => {
+                if (e.data.size > 0) chunksRef.current.push(e.data);
+              };
+              mr.onstop = async () => {
+                const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+                streamRef.current?.getTracks().forEach((t) => t.stop());
+                streamRef.current = null;
+                setIsRecording(false);
+                if (!clientId || blob.size === 0) return;
+                setPending(true);
+                try {
+                  await submitAudio(clientId, blob);
+                  toast.success("Audio envoyé");
+                } catch (err) {
+                  console.error(err);
+                  toast.error("Échec de l'envoi de l'audio");
+                  setPending(false);
+                }
+                setTimeout(() => setPending(false), 4000);
+              };
+              mr.start();
+              setIsRecording(true);
+            } catch (err) {
+              console.error(err);
+              toast.error("Impossible d'accéder au micro");
+              setIsRecording(false);
+            }
+          }}
           disabled={isPending}
           aria-label={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un audio"}
           className={`relative h-9 w-9 rounded-full flex items-center justify-center transition-colors shrink-0 disabled:opacity-30 disabled:cursor-not-allowed ${
