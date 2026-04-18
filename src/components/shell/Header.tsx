@@ -11,9 +11,14 @@ export default function Header() {
       {/* Left: wordmark */}
       <button
         onClick={() => setSelectedClient(null)}
-        className="text-[16px] font-bold text-primary tracking-tight hover:opacity-80 transition-opacity"
+        className="flex items-center hover:opacity-80 transition-opacity"
+        aria-label="Retour à l'accueil"
       >
-        BNP&nbsp;PARIBAS
+        <img
+          src="https://vjecahooihxrofwmdbix.supabase.co/storage/v1/object/public/logo/logo-BNP-Paribas.jpg"
+          alt="BNP Paribas"
+          className="h-7 w-auto"
+        />
       </button>
 
       {/* Center: search slot (640px reserved) */}
