@@ -4,10 +4,11 @@ import { ArrowUp, History, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useClientStore, useUIStore } from "@/lib/store";
-import { submitPrompt, useClientSnapshots, restoreSnapshot } from "@/lib/hooks";
+import { submitPrompt, useClientSnapshots, restoreSnapshot, submitAudio } from "@/lib/hooks";
 import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export default function PromptBar() {
   const clientId = useClientStore((s) => s.selectedClientId);
