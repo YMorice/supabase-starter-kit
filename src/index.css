@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 220 14% 94%;         /* gris clair */
+    --background: 0 0% 98%;            /* #FAFAFA */
     --foreground: 0 0% 4%;             /* #0A0A0A */
 
     --surface: 0 0% 100%;              /* #FFFFFF */
