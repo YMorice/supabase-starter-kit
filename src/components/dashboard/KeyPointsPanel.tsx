@@ -64,8 +64,7 @@ export default function KeyPointsPanel({ clientId, points }: Props) {
   return (
     <Card className="p-5 bg-primary/[0.04] border-primary/20">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[18px] font-bold text-foreground flex items-center gap-2">
-          <span aria-hidden>🎯</span>
+        <h2 className="text-[18px] font-bold text-foreground">
           Points clés à aborder aujourd'hui
         </h2>
         {allChecked && (
@@ -78,7 +77,7 @@ export default function KeyPointsPanel({ clientId, points }: Props) {
 
       {points.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          ✓ Pas de point particulier à signaler pour ce RDV.
+          Pas de point particulier à signaler pour ce RDV.
         </p>
       ) : (
         <ul className="flex flex-col gap-2">
