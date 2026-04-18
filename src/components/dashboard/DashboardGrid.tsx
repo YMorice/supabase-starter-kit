@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import { useUIStore } from "@/lib/store";
-import { Skeleton } from "@/components/ui/skeleton";
 import { renderRegistryComponent } from "@/lib/componentRegistry";
 import type { SnapshotPayload } from "@/lib/types";
 
@@ -9,7 +7,6 @@ interface Props {
 }
 
 export default function DashboardGrid({ payload }: Props) {
-  const isPending = useUIStore((s) => s.isPromptPending);
   const components = payload.components ?? [];
 
   const rendered = components
