@@ -101,7 +101,7 @@ export default function ClientSearch({ variant }: Props) {
           </div>
 
           {showDropdown && (
-            <div className="border-t border-border">
+            <div className="absolute left-0 right-0 top-full mt-2 bg-surface border border-border rounded-2xl shadow-md overflow-hidden z-50">
               <CommandList className="max-h-80">
                 {results.length === 0 ? (
                   isLoading ? (
