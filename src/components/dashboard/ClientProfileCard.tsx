@@ -17,24 +17,24 @@ export default function ClientProfileCard({ data }: Props) {
   const risk = data?.risk_profile;
 
   return (
-    <Card className="p-5 h-full flex flex-col gap-3">
-      <div>
-        <h2 className="text-[18px] font-semibold leading-tight text-foreground">{name}</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
+    <Card className="px-5 py-3 flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-baseline gap-3 min-w-0">
+        <h2 className="text-[18px] font-semibold leading-tight text-foreground truncate">
+          {name}
+        </h2>
+        <p className="text-sm text-muted-foreground truncate">
           {[age ? `${age} ans` : null, job].filter(Boolean).join(" · ") || "—"}
         </p>
       </div>
-      <div className="mt-auto">
-        {risk ? (
-          <Badge variant="secondary" className="font-medium">
-            Profil {risk.toLowerCase()}
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">Profil non défini</span>
-        )}
-      </div>
+      {risk ? (
+        <Badge variant="secondary" className="font-medium shrink-0">
+          Profil {risk.toLowerCase()}
+        </Badge>
+      ) : (
+        <span className="text-xs text-muted-foreground shrink-0">Profil non défini</span>
+      )}
     </Card>
   );
 }
 
-ClientProfileCard.colSpan = 4;
+ClientProfileCard.colSpan = 12;
