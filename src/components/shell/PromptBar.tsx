@@ -4,9 +4,10 @@ import { ArrowUp, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useClientStore, useUIStore } from "@/lib/store";
-import { submitPrompt, useClientPrompts } from "@/lib/hooks";
-import { formatDistanceToNow } from "date-fns";
+import { submitPrompt, useClientSnapshots, restoreSnapshot } from "@/lib/hooks";
+import { formatDistanceToNow, format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function PromptBar() {
   const clientId = useClientStore((s) => s.selectedClientId);
@@ -14,8 +15,20 @@ export default function PromptBar() {
   const setPending = useUIStore((s) => s.setPromptPending);
   const [value, setValue] = useState("");
   const taRef = useRef<HTMLTextAreaElement>(null);
+  const qc = useQueryClient();
 
-  const { data: prompts = [] } = useClientPrompts(clientId);
+  const { data: snapshots = [] } = useClientSnapshots(clientId);
+  const latestId = snapshots[0]?.id;
+
+  const handleRestore = async (snapshotId: string) => {
+    if (!clientId || snapshotId === latestId) return;
+    try {
+      await restoreSnapshot(clientId, snapshotId);
+      qc.invalidateQueries({ queryKey: ["snapshots", clientId] });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Auto-grow
   useEffect(() => {
@@ -62,22 +75,43 @@ export default function PromptBar() {
           </PopoverTrigger>
           <PopoverContent side="top" align="start" className="w-80 p-0 rounded-2xl">
             <div className="px-3 py-2 border-b border-border text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Prompts récents
+              Versions précédentes
             </div>
-            {prompts.length === 0 ? (
-              <div className="px-3 py-6 text-sm text-muted-foreground text-center">Aucun prompt encore.</div>
+            {snapshots.length === 0 ? (
+              <div className="px-3 py-6 text-sm text-muted-foreground text-center">Aucune version encore.</div>
             ) : (
               <ul className="max-h-72 overflow-y-auto">
-                {prompts.map((p) => (
-                  <li key={p.id} className="px-3 py-2 border-b border-border last:border-0 text-sm">
-                    <div className="line-clamp-2 text-foreground">{p.content}</div>
-                    <div className="text-[11px] text-muted-foreground mt-1 flex items-center gap-2">
-                      <span>{formatDistanceToNow(new Date(p.created_at), { locale: fr, addSuffix: true })}</span>
-                      <span>·</span>
-                      <span>{p.status}</span>
-                    </div>
-                  </li>
-                ))}
+                {snapshots.map((s, idx) => {
+                  const isLatest = s.id === latestId;
+                  const date = new Date(s.created_at);
+                  return (
+                    <li key={s.id}>
+                      <button
+                        onClick={() => handleRestore(s.id)}
+                        disabled={isLatest}
+                        className={`w-full text-left px-3 py-2 border-b border-border last:border-0 text-sm transition-colors ${
+                          isLatest ? "bg-primary/5 cursor-default" : "hover:bg-muted/60"
+                        }`}
+                        title={isLatest ? "Version actuelle" : "Restaurer cette version"}
+                      >
+                        <div className="line-clamp-2 text-foreground">
+                          {s.message || s.payload?.message || `Analyse #${snapshots.length - idx}`}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-1 flex items-center gap-2">
+                          <span>{formatDistanceToNow(date, { locale: fr, addSuffix: true })}</span>
+                          <span>·</span>
+                          <span>{format(date, "dd MMM HH:mm", { locale: fr })}</span>
+                          {isLatest && (
+                            <>
+                              <span>·</span>
+                              <span className="text-primary font-medium">actuelle</span>
+                            </>
+                          )}
+                        </div>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </PopoverContent>
