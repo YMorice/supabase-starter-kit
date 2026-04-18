@@ -32,22 +32,6 @@ export default function DashboardGrid({ payload }: Props) {
           </motion.div>
         ))}
       </div>
-
-      {isPending && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-background/60 backdrop-blur-[1px] rounded-lg flex items-start justify-center pt-8 pointer-events-none"
-        >
-          <div className="grid grid-cols-12 gap-4 w-full">
-            <Skeleton className="h-24 col-span-4" />
-            <Skeleton className="h-24 col-span-8" />
-            <Skeleton className="h-40 col-span-7" />
-            <Skeleton className="h-40 col-span-5" />
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }
