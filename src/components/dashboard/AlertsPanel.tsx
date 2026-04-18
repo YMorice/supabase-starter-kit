@@ -48,7 +48,7 @@ export default function AlertsPanel({ data }: Props) {
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {alerts.map((a, i) => {
+          {alerts.slice(0, 2).map((a, i) => {
             const s = severityStyles(a.severity);
             const Icon = s.icon;
             return (

@@ -28,7 +28,7 @@ export default function DashboardGrid({ payload, clientId }: Props) {
 
   const alerts = (alertsData?.alerts as RawAlert[] | undefined) ?? [];
   const opportunities = (oppsData?.opportunities as RawOpportunity[] | undefined) ?? [];
-  const keyPoints = mergeKeyPoints(alerts, opportunities, 3);
+  const keyPoints = mergeKeyPoints(alerts, opportunities, 2);
 
   const profileNode = profile ? renderRegistryComponent("client_profile", profile) : null;
   const alertsNode = renderRegistryComponent("alerts", alertsData);
