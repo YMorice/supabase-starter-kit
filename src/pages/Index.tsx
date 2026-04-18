@@ -2,6 +2,7 @@ import Header from "@/components/shell/Header";
 import ClientSearch from "@/components/shell/ClientSearch";
 import PromptBar from "@/components/shell/PromptBar";
 import DashboardGrid from "@/components/dashboard/DashboardGrid";
+import DetailSidePanel from "@/components/dashboard/DetailSidePanel";
 import { useClientStore } from "@/lib/store";
 import { useClientSnapshots } from "@/lib/hooks";
 
@@ -33,7 +34,7 @@ export default function Index() {
             {isLoading ? (
               <div className="text-sm text-muted-foreground">Chargement…</div>
             ) : latest ? (
-              <DashboardGrid payload={latest.payload ?? {}} />
+              <DashboardGrid payload={latest.payload ?? {}} clientId={selectedClientId} />
             ) : (
               <div className="text-sm text-muted-foreground">Aucune analyse disponible pour ce client.</div>
             )}
@@ -42,6 +43,7 @@ export default function Index() {
       </main>
 
       {selectedClientId && <PromptBar />}
+      <DetailSidePanel />
     </div>
   );
 }
