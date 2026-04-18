@@ -121,6 +121,28 @@ export function useClientPrompts(clientId: string | null) {
   return query;
 }
 
+/* -------- Restore (duplicate) a snapshot as the latest version -------- */
+export async function restoreSnapshot(clientId: string, snapshotId: string) {
+  const { data: src, error: fetchErr } = await supabase
+    .from("client_snapshots")
+    .select("payload, message")
+    .eq("id", snapshotId)
+    .single();
+  if (fetchErr) throw fetchErr;
+
+  const { data, error } = await supabase
+    .from("client_snapshots")
+    .insert({
+      client_id: clientId,
+      payload: src.payload ?? {},
+      message: src.message ?? null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 /* -------- Submit prompt -------- */
 export async function submitPrompt(clientId: string, content: string) {
   const { data, error } = await supabase
