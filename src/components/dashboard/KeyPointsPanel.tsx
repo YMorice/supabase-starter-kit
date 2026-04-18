@@ -122,10 +122,6 @@ export default function KeyPointsPanel({ clientId, points }: Props) {
             );
           })}
         </ul>
-              </li>
-            );
-          })}
-        </ul>
       )}
     </Card>
   );
