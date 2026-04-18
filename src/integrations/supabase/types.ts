@@ -79,6 +79,41 @@ export type Database = {
           },
         ]
       }
+      client_snapshots: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          message: string | null
+          payload: Json
+          triggered_by_prompt_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          payload?: Json
+          triggered_by_prompt_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          payload?: Json
+          triggered_by_prompt_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_snapshots_triggered_by_prompt_id_fkey"
+            columns: ["triggered_by_prompt_id"]
+            isOneToOne: false
+            referencedRelation: "prompts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contrats_produits: {
         Row: {
           client_id: string | null
@@ -460,6 +495,33 @@ export type Database = {
             referencedColumns: ["client_id"]
           },
         ]
+      }
+      prompts: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          content: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       support_detenus: {
         Row: {
