@@ -7,7 +7,7 @@ export default function Header() {
   const setSelectedClient = useClientStore((s) => s.setSelectedClient);
 
   return (
-    <header className="h-14 border-b border-border bg-surface flex items-center px-6 sticky top-0 z-30">
+    <header className="h-16 border-b border-border bg-surface flex items-center px-6 sticky top-0 z-30">
       {/* Left: wordmark */}
       <button
         onClick={() => setSelectedClient(null)}
@@ -17,7 +17,7 @@ export default function Header() {
         <img
           src="https://vjecahooihxrofwmdbix.supabase.co/storage/v1/object/public/logo/logo-BNP-Paribas.jpg"
           alt="BNP Paribas"
-          className="h-7 w-auto"
+          className="h-12 w-auto"
         />
       </button>
 
