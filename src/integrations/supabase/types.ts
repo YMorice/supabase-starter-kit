@@ -75,7 +75,7 @@ export type Database = {
         Row: {
           client_id: string | null
           code_produit: string | null
-          contrat_id: string | null
+          contrat_id: string
           date_ouverture: string | null
           devise: string | null
           encours_eur: string | null
@@ -86,7 +86,7 @@ export type Database = {
         Insert: {
           client_id?: string | null
           code_produit?: string | null
-          contrat_id?: string | null
+          contrat_id: string
           date_ouverture?: string | null
           devise?: string | null
           encours_eur?: string | null
@@ -97,7 +97,7 @@ export type Database = {
         Update: {
           client_id?: string | null
           code_produit?: string | null
-          contrat_id?: string | null
+          contrat_id?: string
           date_ouverture?: string | null
           devise?: string | null
           encours_eur?: string | null
@@ -408,7 +408,7 @@ export type Database = {
           isin: string | null
           libelle: string | null
           poids_dans_contrat_pct: string | null
-          position_id: string | null
+          position_id: string
           quantite: string | null
           secteur: string | null
           valorisation_courante_eur: string | null
@@ -423,7 +423,7 @@ export type Database = {
           isin?: string | null
           libelle?: string | null
           poids_dans_contrat_pct?: string | null
-          position_id?: string | null
+          position_id: string
           quantite?: string | null
           secteur?: string | null
           valorisation_courante_eur?: string | null
@@ -438,7 +438,7 @@ export type Database = {
           isin?: string | null
           libelle?: string | null
           poids_dans_contrat_pct?: string | null
-          position_id?: string | null
+          position_id?: string
           quantite?: string | null
           secteur?: string | null
           valorisation_courante_eur?: string | null
