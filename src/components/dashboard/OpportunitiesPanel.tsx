@@ -27,7 +27,7 @@ export default function OpportunitiesPanel({ data }: Props) {
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {items.map((o, i) => (
+          {items.slice(0, 2).map((o, i) => (
             <li key={i}>
               <button
                 type="button"
