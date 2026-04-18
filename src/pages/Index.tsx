@@ -38,13 +38,12 @@ export default function Index() {
           </div>
         ) : (
           <>
-            {/* Top bar inside main: history button + optional historical banner */}
-            <div className="flex items-center justify-between px-6 pt-4 pb-2">
-              {isHistorical && viewing ? (
+            {isHistorical && viewing && (
+              <div className="px-6 pt-4 pb-2">
                 <motion.div
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-3 text-xs text-warning bg-warning/10 border border-warning/20 rounded-md px-3 py-1.5"
+                  className="flex items-center gap-3 text-xs text-warning bg-warning/10 border border-warning/20 rounded-md px-3 py-1.5 w-fit"
                 >
                   <span>
                     Vous consultez une version du{" "}
@@ -57,13 +56,10 @@ export default function Index() {
                     Revenir à la version actuelle
                   </button>
                 </motion.div>
-              ) : (
-                <div />
-              )}
-              <HistorySheet />
-            </div>
+              </div>
+            )}
 
-            <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-28">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 pt-4 pb-28">
               {isLoading ? (
                 <div className="text-sm text-muted-foreground">Chargement…</div>
               ) : viewing ? (
