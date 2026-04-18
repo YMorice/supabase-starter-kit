@@ -62,15 +62,15 @@ export default function KeyPointsPanel({ clientId, points }: Props) {
   const allChecked = points.length > 0 && points.every((p) => state[p.id]);
 
   return (
-    <Card className="p-5 bg-primary/[0.04] border-primary/20">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-[18px] font-bold text-foreground">
-          Points clés à aborder aujourd'hui
+    <Card className="px-4 py-3 bg-primary/[0.04] border-primary/20">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-[13px] font-semibold text-foreground uppercase tracking-wide">
+          Points clés à aborder
         </h2>
         {allChecked && (
-          <span className="text-xs text-primary font-medium flex items-center gap-1">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            Tous les points clés traités
+          <span className="text-[11px] text-primary font-medium flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3" />
+            Tous traités
           </span>
         )}
       </div>
@@ -80,21 +80,21 @@ export default function KeyPointsPanel({ clientId, points }: Props) {
           Pas de point particulier à signaler pour ce RDV.
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-0.5">
           {points.map((p) => {
             const Icon = iconFor(p);
             const checked = !!state[p.id];
             return (
               <li
                 key={p.id}
-                className={`group flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-background/60 ${
+                className={`group flex items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-background/60 ${
                   checked ? "opacity-60" : ""
                 }`}
               >
                 <Checkbox
                   checked={checked}
                   onCheckedChange={() => toggle(p.id)}
-                  className="mt-0.5"
+                  className="h-3.5 w-3.5"
                   aria-label={`Marquer "${p.title}" comme traité`}
                 />
                 <button
@@ -107,11 +107,11 @@ export default function KeyPointsPanel({ clientId, points }: Props) {
                       description: p.description,
                     })
                   }
-                  className="flex-1 text-left flex items-start gap-2 min-w-0"
+                  className="flex-1 text-left flex items-center gap-1.5 min-w-0"
                 >
-                  <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${colorFor(p)}`} />
+                  <Icon className={`h-3.5 w-3.5 shrink-0 ${colorFor(p)}`} />
                   <span
-                    className={`text-sm font-medium text-foreground leading-snug ${
+                    className={`text-[13px] font-medium text-foreground leading-tight truncate ${
                       checked ? "line-through" : ""
                     }`}
                   >
