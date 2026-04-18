@@ -1,0 +1,260 @@
+{
+  "name": "Dashboard client API",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4b0bc723-ecf4-41df-b768-175d3aea6789",
+              "name": "client_id",
+              "value": "={{ $json.query?.client_id || $json.body?.client_id || $json.body?.record?.client_id || $json.params?.client_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "156c239f-68a9-4c88-9308-8c8e1c7c4b65",
+      "name": "Extract Params"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ===== Config =====\nconst SUPABASE_URL = \"https://vjecahooihxrofwmdbix.supabase.co\";\nconst SUPABASE_KEY = \"YOUR_SUPABASE_SERVICE_KEY\";\nconst clientId = $('Extract Params').item.json.client_id;\n\nif (!clientId) {\n  throw new Error(\"client_id manquant\");\n}\n\n// ===== Helpers =====\nfunction buildQueryString(params) {\n  return Object.entries(params)\n    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)\n    .join(\"&\");\n}\n\nasync function fetchTable(table, extraParams = {}) {\n  const params = { select: \"*\", ...extraParams };\n  const url = `${SUPABASE_URL}/rest/v1/${table}?${buildQueryString(params)}`;\n  return await this.helpers.httpRequest({\n    method: \"GET\",\n    url,\n    headers: { apikey: SUPABASE_KEY },\n    json: true,\n  });\n}\n\nfunction dedupe(arr) {\n  const seen = new Set();\n  return arr.filter((item) => {\n    const key = JSON.stringify(item);\n    if (seen.has(key)) return false;\n    seen.add(key);\n    return true;\n  });\n}\n\nfunction parseFR(val) {\n  if (val === null || val === undefined || val === \"\") return null;\n  if (typeof val === \"number\") return val;\n  if (typeof val === \"string\") {\n    const cleaned = val.replace(/\\s/g, \"\").replace(\",\", \".\");\n    const n = parseFloat(cleaned);\n    return isNaN(n) ? val : n;\n  }\n  return val;\n}\n\nfunction normalizeNumbers(obj) {\n  if (Array.isArray(obj)) return obj.map(normalizeNumbers);\n  if (obj === null || typeof obj !== \"object\") return obj;\n  const result = {};\n  for (const [k, v] of Object.entries(obj)) {\n    if (/_(eur|pct|annees)$|^(vl_|taux|montant|quantite|poids|score|encours|valeur|plafond|mensualite|crd|age|nb_|revenus|tmi|allocation|anciennete)/i.test(k)) {\n      result[k] = parseFR(v);\n    } else if (typeof v === \"object\") {\n      result[k] = normalizeNumbers(v);\n    } else {\n      result[k] = v;\n    }\n  }\n  return result;\n}\n\n// ===== Fetch 10 tables en parallèle =====\nconst [\n  profil, foyer, projetsObjectifs, contratsProduits, caracteristiques,\n  supportsDetenus, evenements, fluxFinanciers, histoValoContrats, indicesMarche,\n] = await Promise.all([\n  fetchTable.call(this, \"profil_client\", { client_id: `eq.${clientId}` }),\n  fetchTable.call(this, \"foyer\", { client_id: `eq.${clientId}` }),\n  fetchTable.call(this, \"projet_objectifs\", { client_id: `eq.${clientId}` }),\n  fetchTable.call(this, \"contrats_produits\", { client_id: `eq.${clientId}` }),\n  fetchTable.call(this, \"caracteristiques\", { client_id: `eq.${clientId}` }),\n  fetchTable.call(this, \"support_detenus\", { client_id: `eq.${clientId}` }),\n  fetchTable.call(this, \"evenements_interactions\", { client_id: `eq.${clientId}`, order: \"date.desc\", limit: \"30\" }),\n  fetchTable.call(this, \"flux_financiers\", { client_id: `eq.${clientId}`, order: \"date.desc\", limit: \"24\" }),\n  fetchTable.call(this, \"historique_valorisation_contrats\", { client_id: `eq.${clientId}`, order: \"date.desc\", limit: \"60\" }),\n  fetchTable.call(this, \"indices_marche\", { order: \"date.desc\", limit: \"12\" }),\n]);\n\nconst clientData = {\n  client_id: clientId,\n  profil: normalizeNumbers(profil[0] || null),\n  foyer: normalizeNumbers(dedupe(foyer)[0] || null),\n  projets_objectifs: normalizeNumbers(dedupe(projetsObjectifs)),\n  contrats_produits: normalizeNumbers(dedupe(contratsProduits)),\n  caracteristiques: normalizeNumbers(dedupe(caracteristiques)),\n  supports_detenus: normalizeNumbers(dedupe(supportsDetenus)),\n  evenements: normalizeNumbers(dedupe(evenements)),\n  flux_financiers: normalizeNumbers(dedupe(fluxFinanciers)),\n  historique_valorisation_contrats: normalizeNumbers(dedupe(histoValoContrats)),\n  indices_marche: normalizeNumbers(dedupe(indicesMarche)),\n};\n\n// ===== Peer groups hardcodés =====\nconst peerGroups = {\n  \"jeune-actif\": { label: \"Jeunes Actifs\", metrics: { risk: 50, liquidity: 62, diversification: 20, retirement: 8, savings: 10, perf: 2.5, contracts: 2 }, social: { pct: 75, msg: \"ont activé l'épargne automatique par arrondis.\" } },\n  \"entrepreneur\": { label: \"Entrepreneurs & Professions libérales\", metrics: { risk: 65, liquidity: 55, diversification: 55, retirement: 45, savings: 22, perf: 4.5, contracts: 7 }, social: { pct: 68, msg: \"utilisent un PER pour optimiser leur fiscalité.\" } },\n  \"senior-haut-tmi\": { label: \"Seniors patrimoniaux TMI élevée\", metrics: { risk: 45, liquidity: 40, diversification: 75, retirement: 60, savings: 18, perf: 3.8, contracts: 8 }, social: { pct: 82, msg: \"ont une stratégie de transmission formalisée.\" } },\n  \"retraite-transmission\": { label: \"Retraités patrimoniaux\", metrics: { risk: 25, liquidity: 50, diversification: 65, retirement: 90, savings: 8, perf: 2.2, contracts: 6 }, social: { pct: 78, msg: \"ont une clause bénéficiaire optimisée sur leur AV.\" } },\n  \"famille-proprietaire\": { label: \"Familles propriétaires\", metrics: { risk: 40, liquidity: 45, diversification: 45, retirement: 25, savings: 12, perf: 3, contracts: 5 }, social: { pct: 72, msg: \"ont souscrit une assurance décès pour protéger leur famille.\" } },\n  \"fragile\": { label: \"Clients financièrement fragiles\", metrics: { risk: 15, liquidity: 20, diversification: 10, retirement: 5, savings: 3, perf: 0.8, contracts: 2 }, social: { pct: 65, msg: \"ont activé les alertes de découvert préventives.\" } },\n};\n\n// ===== System prompt MODULAIRE =====\nconst systemPrompt = `Tu es un assistant IA pour les conseillers bancaires BNP Paribas.\nTu analyses les VRAIES données Supabase fournies et produis un dashboard ONE-PAGE.\n\n## Règle d'or\n- Utilise UNIQUEMENT les données fournies. Jamais inventer.\n- Le dashboard contient EXACTEMENT 4 composants, pas plus, pas moins.\n- client_profile est TOUJOURS présent en premier.\n- Tu choisis les 3 autres composants les plus pertinents pour CE client selon son archetype, sa situation et ses enjeux prioritaires.\n\n## Comment choisir les 3 autres composants (hors client_profile)\n\nDemande-toi : \"Si le conseiller n'avait que 30 secondes pour comprendre ce client, quels 3 blocs lui donneraient le plus de valeur pour le RDV ?\"\n\nHeuristiques par type de client :\n- Client fragile / découverts → cash_flow + alerts + opportunities (stabiliser)\n- Jeune actif équilibré sans crédit → cash_flow + alerts + opportunities (activer l'épargne)\n- Famille propriétaire avec crédit → patrimony_summary + projects + alerts\n- Senior patrimonial → patrimony_summary + alerts + opportunities (transmission, fiscal)\n- Retraité → patrimony_summary + alerts + opportunities (succession)\n- Profession libérale établie → patrimony_summary + cash_flow + opportunities\n- Client avec événements de vie marquants récents (déménagement, divorce, etc.) → life_events obligatoire\n\nSi un composant serait vide ou très pauvre en données pour ce client, ne le choisis pas.\n\n## Format de sortie OBLIGATOIRE\nJSON valide uniquement. Pas de markdown, pas de backticks, rien avant/après.\n\n{\n  \"components\": [\n    { \"type\": \"...\", \"data\": {...} }\n  ]\n}\n\n## Catalogue des composants disponibles\n\n### client_profile (TOUJOURS en premier)\n{\n  \"type\": \"client_profile\",\n  \"data\": {\n    \"name\": \"Prénom Nom\",\n    \"age\": number,\n    \"job\": \"string (profil.csp)\",\n    \"risk_profile\": \"string (profil.profil_risque)\"\n  }\n}\n\n### cash_flow (12 derniers mois chronologiques ASC)\n{\n  \"type\": \"cash_flow\",\n  \"data\": {\n    \"flows\": [\n      { \"date\": \"YYYY-MM\", \"revenus\": number, \"depenses\": number, \"epargne\": number }\n    ]\n  }\n}\n\n### patrimony_summary\n{\n  \"type\": \"patrimony_summary\",\n  \"data\": {\n    \"contracts\": [\n      { \"libelle\": \"string\", \"famille\": \"string\", \"encours_eur\": number }\n    ],\n    \"total_encours\": number\n  }\n}\n\n### projects\n{\n  \"type\": \"projects\",\n  \"data\": {\n    \"projects\": [\n      { \"label\": \"string\", \"horizon_annees\": number, \"montant_cible_eur\": number, \"priorite\": \"Haute|Moyenne|Basse\" }\n    ]\n  }\n}\n\n### life_events (MAX 4, sélection éditoriale)\nPriorise les événements de vie (augmentation, déménagement, changement statut). \nÉvite de lister plusieurs réclamations identiques (1 max pour signaler la tendance).\n{\n  \"type\": \"life_events\",\n  \"data\": {\n    \"events\": [\n      { \"date\": \"YYYY-MM-DD\", \"type\": \"life|interaction\", \"title\": \"string court\", \"description\": \"1 phrase courte\" }\n    ]\n  }\n}\n\n### alerts (MAX 4, hiérarchie danger > warning > info)\nTitres 3-5 mots. Descriptions 1-2 phrases max, chiffres concrets.\n{\n  \"type\": \"alerts\",\n  \"data\": {\n    \"alerts\": [\n      { \"title\": \"string court\", \"severity\": \"danger|warning|info\", \"description\": \"1-2 phrases\" }\n    ]\n  }\n}\n\n### opportunities (MAX 4)\nTitres courts (nom produit/action). Rationale 1-2 phrases avec chiffre.\n{\n  \"type\": \"opportunities\",\n  \"data\": {\n    \"opportunities\": [\n      { \"title\": \"string court\", \"rationale\": \"1-2 phrases\" }\n    ]\n  }\n}\n\n## Règles métier BNP\n- Livret A plafonné 22 950€, LDDS 12 000€, PEA 150 000€\n- AV à 90% fonds euro pour profil Équilibré = warning\n- Clause bénéficiaire inadaptée = danger\n- Découverts répétés = fragilité\n- PER si TMI ≥ 30%, jamais pour retraité\n- AV : avantage fiscal après 8 ans\n\n## Contraintes absolues\n- 4 composants exactement, jamais plus, jamais moins\n- client_profile TOUJOURS en premier\n- Français, pas d'accents dans les clés JSON\n- Nombres en format JSON standard\n- JSON parseable directement, pas de \\\\n dans les strings\n- Pas de markdown dans les strings\n- Réponds UNIQUEMENT avec {\"components\": [...]}`;\n\n// ===== User prompt =====\nconst userPrompt = `Voici les données du client. Construis le dashboard modulaire le plus pertinent.\n\n## Données du client\n${JSON.stringify(clientData, null, 2)}\n\n## Groupes de pairs disponibles\n${JSON.stringify(peerGroups, null, 2)}\n\nRéponds uniquement avec le JSON du dashboard, sans texte avant ni après.`;\n\n// ===== Sortie =====\nreturn [\n  {\n    json: {\n      client_id: clientId,\n      client_data: clientData,\n      peer_groups: peerGroups,\n      system_prompt: systemPrompt,\n      user_prompt: userPrompt,\n      _meta: {\n        fetched_at: new Date().toISOString(),\n        user_prompt_length: userPrompt.length,\n        estimated_input_tokens: Math.ceil(userPrompt.length / 4),\n      },\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6a44f175-7536-42c7-a562-5a87f2074dd2",
+      "name": "Fetch All Client Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bedrock-runtime.us-west-2.amazonaws.com/model/us.anthropic.claude-sonnet-4-6/converse",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"system\": [\n    {\n      \"text\": {{ JSON.stringify($('Fetch All Client Data').item.json.system_prompt) }}\n    }\n  ],\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": [\n        {\n          \"text\": {{ JSON.stringify($('Fetch All Client Data').item.json.user_prompt) }}\n        }\n      ]\n    }\n  ],\n  \"inferenceConfig\": {\n    \"maxTokens\": 16000,\n    \"temperature\": 0.3\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "7ae37780-377c-4b76-a778-96218c7218fc",
+      "name": "Call Bedrock",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "KfwUuc4ZAJjxbBzW",
+          "name": "AWS Bedrock Bearer Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const bedrockResponse = $input.first().json;\n\n// Extraction texte\nlet rawText;\ntry {\n  rawText = bedrockResponse.output.message.content[0].text;\n} catch (err) {\n  throw new Error(\"Réponse Bedrock inattendue: \" + JSON.stringify(bedrockResponse).slice(0, 500));\n}\n\n// Nettoyage markdown\nlet cleaned = rawText.trim();\nconst fenceMatch = cleaned.match(/^```(?:json)?\\s*([\\s\\S]*?)\\s*```$/);\nif (fenceMatch) cleaned = fenceMatch[1].trim();\n\nconst firstBrace = cleaned.indexOf(\"{\");\nconst lastBrace = cleaned.lastIndexOf(\"}\");\nif (firstBrace >= 0 && lastBrace > firstBrace) {\n  cleaned = cleaned.slice(firstBrace, lastBrace + 1);\n}\n\n// Parse\nlet parsed;\ntry {\n  parsed = JSON.parse(cleaned);\n} catch (err) {\n  throw new Error(\"JSON invalide Claude: \" + err.message + \"\\nExtrait: \" + cleaned.slice(0, 500));\n}\n\nif (!parsed.components || !Array.isArray(parsed.components)) {\n  throw new Error(\"Structure invalide, 'components' manquant: \" + JSON.stringify(parsed).slice(0, 300));\n}\n\n// Whitelist des types Lovable\nconst VALID_TYPES = new Set([\n  \"client_profile\",\n  \"cash_flow\",\n  \"patrimony_summary\",\n  \"life_events\",\n  \"projects\",\n  \"alerts\",\n  \"opportunities\",\n]);\n\nconst validComponents = parsed.components.filter(\n  (c) => c && typeof c === \"object\" && c.type && c.data && VALID_TYPES.has(c.type)\n);\n\nreturn [\n  {\n    json: {\n      components: validComponents,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "cdca1916-9a52-470c-b785-93b4d06d863b",
+      "name": "Parse Response"
+    },
+    {
+      "parameters": {
+        "tableId": "client_snapshots",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "client_id",
+              "fieldValue": "={{ $('Extract Params').item.json.client_id }}"
+            },
+            {
+              "fieldId": "payload",
+              "fieldValue": "={{ $json.payload }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        0
+      ],
+      "id": "4ae08415-9f52-408a-bbe2-25f45fd96ed4",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "iV13GawRE6984uhn",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('Parse Response').item.json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1440,
+        0
+      ],
+      "id": "760003d3-21de-458b-bcc8-83e887f9feec",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "client-dashboard",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9f0ebdc6-1292-463d-bb26-82c8512d02db",
+      "name": "Webhook",
+      "webhookId": "d1be1d73-cddf-409e-9215-135e759ff5b0"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\nreturn [{\n  json: {\n    client_id: item.json.components?.find(c => c.type === 'client_profile')?.data?.name ?? 'unknown',\n    payload: item.json\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "c2b294f0-a478-4f67-81d4-f58915f6a71a",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Extract Params": {
+      "main": [
+        [
+          {
+            "node": "Fetch All Client Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch All Client Data": {
+      "main": [
+        [
+          {
+            "node": "Call Bedrock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Bedrock": {
+      "main": [
+        [
+          {
+            "node": "Parse Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Response": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Params",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "3737f7ae-80b1-4589-888c-acdbdbb03828",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d37b6c57fd187a060173f9d4759f0c40a54dedd34055cbd0f5543c114f8559a9"
+  },
+  "id": "witb0u8xHVp9e9qz",
+  "tags": []
+}

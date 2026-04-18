@@ -1,0 +1,113 @@
+{
+  "name": "HackathonTranscribe",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "speech",
+        "operation": "speechToText",
+        "file": "=audio",
+        "additionalOptions": {},
+        "requestOptions": {}
+      },
+      "type": "@elevenlabs/n8n-nodes-elevenlabs.elevenLabs",
+      "typeVersion": 1,
+      "position": [
+        144,
+        0
+      ],
+      "id": "ed71d75e-7926-40ce-bfca-d4899bcb07fc",
+      "name": "Transcribe audio or video",
+      "credentials": {
+        "elevenLabsApi": {
+          "id": "vjiF2fqbFAz9IHFW",
+          "name": "ElevenLabs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2be84cf6-9e18-4ded-9c0c-9d50038b858f",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "49d659c3-4dc7-4623-81cb-b8572d158561",
+      "name": "Webhook",
+      "webhookId": "2be84cf6-9e18-4ded-9c0c-9d50038b858f"
+    },
+    {
+      "parameters": {
+        "tableId": "prompts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "client_id",
+              "fieldValue": "={{ $('Webhook').item.json.body.client_id }}"
+            },
+            {
+              "fieldId": "content",
+              "fieldValue": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        336,
+        0
+      ],
+      "id": "1d3933cc-e735-40a2-915a-869d88af6dbd",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "6bb52qrNDa4fOIlY",
+          "name": "Supabase account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Transcribe audio or video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe audio or video": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "90f31414-bfe3-4c0d-870c-4f84e441cd74",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d37b6c57fd187a060173f9d4759f0c40a54dedd34055cbd0f5543c114f8559a9"
+  },
+  "id": "XJgDsNxfhcECmZnK",
+  "tags": []
+}
