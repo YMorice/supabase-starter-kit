@@ -27,8 +27,8 @@ export default function ClientSearch({ variant }: Props) {
     return () => clearTimeout(t);
   }, [query]);
 
-  const { data: results = [] } = useClientSearch(debounced);
-  const showDropdown = open && results.length > 0;
+  const { data: results = [], isLoading } = useClientSearch(debounced);
+  const showDropdown = open;
 
   // Reset query when client deselected
   useEffect(() => {
@@ -87,25 +87,32 @@ export default function ClientSearch({ variant }: Props) {
         {showDropdown && (
           <div className="absolute left-0 right-0 top-full mt-2 bg-popover border border-border rounded-lg shadow-md overflow-hidden z-50">
             <CommandList className="max-h-80">
-              <CommandEmpty>Aucun client trouvé.</CommandEmpty>
-              <CommandGroup>
-                {results.map((c) => (
-                  <CommandItem
-                    key={c.client_id}
-                    value={c.client_id}
-                    onSelect={() => handleSelect(c)}
-                    className="cursor-pointer flex items-center justify-between"
-                  >
-                    <div>
-                      <div className="text-sm font-medium">{fullName(c)}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {[c.age ? `${c.age} ans` : null, c.csp].filter(Boolean).join(" · ") || c.client_id}
+              {results.length === 0 ? (
+                isLoading ? (
+                  <div className="px-4 py-6 text-sm text-muted-foreground text-center">Chargement…</div>
+                ) : (
+                  <CommandEmpty>Aucun client trouvé.</CommandEmpty>
+                )
+              ) : (
+                <CommandGroup heading={debounced.trim() ? undefined : "Suggestions"}>
+                  {results.map((c) => (
+                    <CommandItem
+                      key={c.client_id}
+                      value={c.client_id}
+                      onSelect={() => handleSelect(c)}
+                      className="cursor-pointer flex items-center justify-between"
+                    >
+                      <div>
+                        <div className="text-sm font-medium">{fullName(c)}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {[c.age ? `${c.age} ans` : null, c.csp].filter(Boolean).join(" · ") || c.client_id}
+                        </div>
                       </div>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground tabular-nums">{c.client_id}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+                      <span className="text-[10px] text-muted-foreground tabular-nums">{c.client_id}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </CommandList>
           </div>
         )}
