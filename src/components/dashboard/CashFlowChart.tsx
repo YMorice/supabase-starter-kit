@@ -40,7 +40,7 @@ export default function CashFlowChart({ data }: Props) {
           Aucune donnée de flux
         </div>
       ) : (
-        <div className="h-52 w-full">
+        <div className="h-32 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} barCategoryGap="20%">
               <XAxis
