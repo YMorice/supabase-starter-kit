@@ -178,7 +178,23 @@ export async function submitAudio(clientId: string, blob: Blob) {
 
   const url =
     "https://n8n-theo.tiro.agency/webhook/2be84cf6-9e18-4ded-9c0c-9d50038b858f";
-  const res = await fetch(url, { method: "POST", body: fd });
-  if (!res.ok) throw new Error(`n8n webhook failed: ${res.status}`);
-  return res;
+
+  console.log("[submitAudio] POST", url, "size:", blob.size, "type:", blob.type);
+
+  try {
+    const res = await fetch(url, { method: "POST", body: fd });
+    console.log("[submitAudio] status:", res.status);
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      console.error("[submitAudio] body:", txt);
+      throw new Error(`n8n webhook failed: ${res.status}`);
+    }
+    return res;
+  } catch (err) {
+    // Likely CORS — retry no-cors so the POST still reaches n8n (opaque response).
+    console.warn("[submitAudio] fetch failed, retry no-cors:", err);
+    await fetch(url, { method: "POST", body: fd, mode: "no-cors" });
+    console.log("[submitAudio] no-cors POST sent (opaque)");
+    return null;
+  }
 }
