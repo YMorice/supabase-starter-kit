@@ -3,7 +3,11 @@ export type ComponentType =
   | "financial_summary"
   | "loans"
   | "alerts"
-  | "opportunities";
+  | "opportunities"
+  | "projects"
+  | "cash_flow"
+  | "patrimony_summary"
+  | "life_events";
 
 export interface DashboardComponent {
   type: ComponentType | string;
