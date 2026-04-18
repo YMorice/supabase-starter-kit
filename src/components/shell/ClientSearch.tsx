@@ -78,7 +78,7 @@ export default function ClientSearch({ variant }: Props) {
       >
         <Command
           shouldFilter={false}
-          className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm"
+          className="bg-surface border border-border rounded-2xl overflow-visible shadow-sm"
         >
           <div className={`flex items-center px-4 ${heightClass}`}>
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -101,7 +101,7 @@ export default function ClientSearch({ variant }: Props) {
           </div>
 
           {showDropdown && (
-            <div className="border-t border-border">
+            <div className="absolute left-0 right-0 top-full mt-2 bg-surface border border-border rounded-2xl shadow-md overflow-hidden z-50">
               <CommandList className="max-h-80">
                 {results.length === 0 ? (
                   isLoading ? (
