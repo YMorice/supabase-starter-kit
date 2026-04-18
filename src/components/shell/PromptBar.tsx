@@ -148,7 +148,51 @@ export default function PromptBar() {
 
         <button
           type="button"
-          onClick={() => setIsRecording((r) => !r)}
+          onClick={async () => {
+            if (isRecording) {
+              // Stop recording
+              const mr = mediaRecorderRef.current;
+              if (mr && mr.state !== "inactive") mr.stop();
+              return;
+            }
+            // Start recording
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              streamRef.current = stream;
+              chunksRef.current = [];
+              const mimeType = MediaRecorder.isTypeSupported("audio/webm")
+                ? "audio/webm"
+                : "";
+              const mr = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+              mediaRecorderRef.current = mr;
+              mr.ondataavailable = (e) => {
+                if (e.data.size > 0) chunksRef.current.push(e.data);
+              };
+              mr.onstop = async () => {
+                const blob = new Blob(chunksRef.current, { type: mr.mimeType || "audio/webm" });
+                streamRef.current?.getTracks().forEach((t) => t.stop());
+                streamRef.current = null;
+                setIsRecording(false);
+                if (!clientId || blob.size === 0) return;
+                setPending(true);
+                try {
+                  await submitAudio(clientId, blob);
+                  toast.success("Audio envoyé");
+                } catch (err) {
+                  console.error(err);
+                  toast.error("Échec de l'envoi de l'audio");
+                  setPending(false);
+                }
+                setTimeout(() => setPending(false), 4000);
+              };
+              mr.start();
+              setIsRecording(true);
+            } catch (err) {
+              console.error(err);
+              toast.error("Impossible d'accéder au micro");
+              setIsRecording(false);
+            }
+          }}
           disabled={isPending}
           aria-label={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un audio"}
           className={`relative h-9 w-9 rounded-full flex items-center justify-center transition-colors shrink-0 disabled:opacity-30 disabled:cursor-not-allowed ${
