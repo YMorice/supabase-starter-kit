@@ -29,7 +29,7 @@ export default function Header() {
       </div>
 
       {/* Right: avatar */}
-      <Avatar className="h-8 w-8 border border-border">
+      <Avatar className="h-9 w-9">
         <AvatarFallback className="bg-muted text-foreground text-xs font-medium">CN</AvatarFallback>
       </Avatar>
     </header>
