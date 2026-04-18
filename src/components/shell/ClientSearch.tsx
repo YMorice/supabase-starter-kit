@@ -78,7 +78,7 @@ export default function ClientSearch({ variant }: Props) {
       >
         <Command
           shouldFilter={false}
-          className="bg-surface border border-border rounded-2xl overflow-visible shadow-sm"
+          className="bg-surface border border-border rounded-full overflow-visible shadow-sm"
         >
           <div className={`flex items-center px-4 ${heightClass}`}>
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -95,9 +95,6 @@ export default function ClientSearch({ variant }: Props) {
               placeholder={placeholder}
               className="flex-1 bg-transparent border-0 outline-none px-3 placeholder:text-muted-foreground"
             />
-            <kbd className="hidden sm:inline text-[10px] text-muted-foreground border border-border rounded px-1.5 py-0.5">
-              ↵
-            </kbd>
           </div>
 
           {showDropdown && (

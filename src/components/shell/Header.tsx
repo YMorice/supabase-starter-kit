@@ -7,7 +7,7 @@ export default function Header() {
   const setSelectedClient = useClientStore((s) => s.setSelectedClient);
 
   return (
-    <header className="h-16 border-b border-border bg-surface flex items-center px-6 sticky top-0 z-30">
+    <header className="h-16 bg-surface flex items-center px-6 sticky top-0 z-30">
       {/* Left: wordmark */}
       <button
         onClick={() => setSelectedClient(null)}
@@ -29,7 +29,7 @@ export default function Header() {
       </div>
 
       {/* Right: avatar */}
-      <Avatar className="h-8 w-8 border border-border">
+      <Avatar className="h-9 w-9">
         <AvatarFallback className="bg-muted text-foreground text-xs font-medium">CN</AvatarFallback>
       </Avatar>
     </header>
