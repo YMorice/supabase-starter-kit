@@ -89,6 +89,10 @@ export default {
           "0%, 100%": { transform: "scaleY(0.4)" },
           "50%": { transform: "scaleY(1)" },
         },
+        "loading-bar": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(400%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
