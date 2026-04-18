@@ -168,3 +168,17 @@ export async function submitPrompt(clientId: string, content: string) {
 
   return data as Prompt;
 }
+
+/* -------- Submit audio recording to n8n webhook -------- */
+export async function submitAudio(clientId: string, blob: Blob) {
+  const fd = new FormData();
+  fd.append("audio", blob, `recording-${Date.now()}.webm`);
+  fd.append("client_id", clientId);
+  fd.append("timestamp", new Date().toISOString());
+
+  const url =
+    "https://n8n-theo.tiro.agency/webhook/2be84cf6-9e18-4ded-9c0c-9d50038b858f";
+  const res = await fetch(url, { method: "POST", body: fd });
+  if (!res.ok) throw new Error(`n8n webhook failed: ${res.status}`);
+  return res;
+}
