@@ -1,0 +1,11 @@
+CREATE POLICY "Public read profil_client" ON public.profil_client FOR SELECT USING (true);
+CREATE POLICY "Public read contrats_produits" ON public.contrats_produits FOR SELECT USING (true);
+CREATE POLICY "Public read caracteristiques" ON public.caracteristiques FOR SELECT USING (true);
+CREATE POLICY "Public read evenements_interactions" ON public.evenements_interactions FOR SELECT USING (true);
+CREATE POLICY "Public read flux_financiers" ON public.flux_financiers FOR SELECT USING (true);
+CREATE POLICY "Public read foyer" ON public.foyer FOR SELECT USING (true);
+CREATE POLICY "Public read historique_valorisation_contrats" ON public.historique_valorisation_contrats FOR SELECT USING (true);
+CREATE POLICY "Public read historique_valorisation_support" ON public.historique_valorisation_support FOR SELECT USING (true);
+CREATE POLICY "Public read indices_marche" ON public.indices_marche FOR SELECT USING (true);
+CREATE POLICY "Public read projet_objectifs" ON public.projet_objectifs FOR SELECT USING (true);
+CREATE POLICY "Public read support_detenus" ON public.support_detenus FOR SELECT USING (true);
