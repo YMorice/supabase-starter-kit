@@ -15,9 +15,9 @@ export default function Header() {
         aria-label="Retour à l'accueil"
       >
         <img
-          src="https://vjecahooihxrofwmdbix.supabase.co/storage/v1/object/public/logo/logo-BNP-Paribas.jpg"
+          src="https://vjecahooihxrofwmdbix.supabase.co/storage/v1/object/public/logo/BNP.PA.png"
           alt="BNP Paribas"
-          className="h-12 w-auto"
+          className="h-8 w-auto"
         />
       </button>
 
