@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      Caractéristiques: {
+      caracteristiques: {
         Row: {
           allocation_fonds_euro_pct: string | null
           allocation_uc_pct: string | null
@@ -69,13 +69,21 @@ export type Database = {
           plafond_eur?: string | null
           taux_pct?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Caractéristiques_contrat_id_fkey"
+            columns: ["contrat_id"]
+            isOneToOne: false
+            referencedRelation: "contrats_produits"
+            referencedColumns: ["contrat_id"]
+          },
+        ]
       }
-      "Contrats produits": {
+      contrats_produits: {
         Row: {
           client_id: string | null
           code_produit: string | null
-          contrat_id: string | null
+          contrat_id: string
           date_ouverture: string | null
           devise: string | null
           encours_eur: string | null
@@ -86,7 +94,7 @@ export type Database = {
         Insert: {
           client_id?: string | null
           code_produit?: string | null
-          contrat_id?: string | null
+          contrat_id: string
           date_ouverture?: string | null
           devise?: string | null
           encours_eur?: string | null
@@ -97,7 +105,7 @@ export type Database = {
         Update: {
           client_id?: string | null
           code_produit?: string | null
-          contrat_id?: string | null
+          contrat_id?: string
           date_ouverture?: string | null
           devise?: string | null
           encours_eur?: string | null
@@ -105,9 +113,17 @@ export type Database = {
           libelle_produit?: string | null
           statut?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Contrats produits_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profil_client"
+            referencedColumns: ["client_id"]
+          },
+        ]
       }
-      "Evénements et interactions": {
+      evenements_interactions: {
         Row: {
           canal: string | null
           categorie: string | null
@@ -135,9 +151,17 @@ export type Database = {
           description?: string | null
           type?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Evénements et interactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profil_client"
+            referencedColumns: ["client_id"]
+          },
+        ]
       }
-      "Flux financiers": {
+      flux_financiers: {
         Row: {
           client_id: string | null
           date: string | null
@@ -171,9 +195,17 @@ export type Database = {
           revenus_eur?: string | null
           type_exceptionnel?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Flux financiers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profil_client"
+            referencedColumns: ["client_id"]
+          },
+        ]
       }
-      Foyer: {
+      foyer: {
         Row: {
           ages_enfants: string | null
           annee_acquisition_residence: string | null
@@ -216,9 +248,17 @@ export type Database = {
           type_logement?: string | null
           valeur_estimee_residence_eur?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Foyer_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profil_client"
+            referencedColumns: ["client_id"]
+          },
+        ]
       }
-      "Historique valorisation contrats": {
+      historique_valorisation_contrats: {
         Row: {
           client_id: string | null
           code_produit: string | null
@@ -240,51 +280,66 @@ export type Database = {
           date?: string | null
           encours_eur?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Historique valorisation contrats_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profil_client"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "Historique valorisation contrats_contrat_id_fkey"
+            columns: ["contrat_id"]
+            isOneToOne: false
+            referencedRelation: "contrats_produits"
+            referencedColumns: ["contrat_id"]
+          },
+        ]
       }
-      "Historique valorisation support": {
+      historique_valorisation_support: {
         Row: {
-          date: string | null
-          isin: string | null
+          date: string
+          isin: string
           libelle: string | null
           vl_eur: string | null
         }
         Insert: {
-          date?: string | null
-          isin?: string | null
+          date: string
+          isin: string
           libelle?: string | null
           vl_eur?: string | null
         }
         Update: {
-          date?: string | null
-          isin?: string | null
+          date?: string
+          isin?: string
           libelle?: string | null
           vl_eur?: string | null
         }
         Relationships: []
       }
-      "Indices marché": {
+      indices_marche: {
         Row: {
-          code_indice: string | null
-          date: string | null
+          code_indice: string
+          date: string
           libelle_indice: string | null
           valeur: string | null
         }
         Insert: {
-          code_indice?: string | null
-          date?: string | null
+          code_indice: string
+          date: string
           libelle_indice?: string | null
           valeur?: string | null
         }
         Update: {
-          code_indice?: string | null
-          date?: string | null
+          code_indice?: string
+          date?: string
           libelle_indice?: string | null
           valeur?: string | null
         }
         Relationships: []
       }
-      "Profil client": {
+      profil_client: {
         Row: {
           adresse: string | null
           age: number | null
@@ -293,7 +348,7 @@ export type Database = {
           archetype: string | null
           canal_prefere: string | null
           civilite: string | null
-          client_id: string | null
+          client_id: string
           code_postal: number | null
           conseiller_attitre: string | null
           csp: string | null
@@ -321,7 +376,7 @@ export type Database = {
           archetype?: string | null
           canal_prefere?: string | null
           civilite?: string | null
-          client_id?: string | null
+          client_id: string
           code_postal?: number | null
           conseiller_attitre?: string | null
           csp?: string | null
@@ -349,7 +404,7 @@ export type Database = {
           archetype?: string | null
           canal_prefere?: string | null
           civilite?: string | null
-          client_id?: string | null
+          client_id?: string
           code_postal?: number | null
           conseiller_attitre?: string | null
           csp?: string | null
@@ -371,7 +426,7 @@ export type Database = {
         }
         Relationships: []
       }
-      "Projet objectifs": {
+      projet_objectifs: {
         Row: {
           client_id: string | null
           date_declaration: string | null
@@ -396,19 +451,27 @@ export type Database = {
           priorite?: string | null
           projet?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Projet objectifs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profil_client"
+            referencedColumns: ["client_id"]
+          },
+        ]
       }
-      "Support détenus": {
+      support_detenus: {
         Row: {
           classe_actif: string | null
           client_id: string | null
           contrat_id: string | null
           date_premier_achat: string | null
           devise: string | null
-          isin: string | null
+          isin: string
           libelle: string | null
           poids_dans_contrat_pct: string | null
-          position_id: string | null
+          position_id: string
           quantite: string | null
           secteur: string | null
           valorisation_courante_eur: string | null
@@ -420,10 +483,10 @@ export type Database = {
           contrat_id?: string | null
           date_premier_achat?: string | null
           devise?: string | null
-          isin?: string | null
+          isin: string
           libelle?: string | null
           poids_dans_contrat_pct?: string | null
-          position_id?: string | null
+          position_id: string
           quantite?: string | null
           secteur?: string | null
           valorisation_courante_eur?: string | null
@@ -435,16 +498,24 @@ export type Database = {
           contrat_id?: string | null
           date_premier_achat?: string | null
           devise?: string | null
-          isin?: string | null
+          isin?: string
           libelle?: string | null
           poids_dans_contrat_pct?: string | null
-          position_id?: string | null
+          position_id?: string
           quantite?: string | null
           secteur?: string | null
           valorisation_courante_eur?: string | null
           zone_geo?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Support détenus_contrat_id_fkey"
+            columns: ["contrat_id"]
+            isOneToOne: false
+            referencedRelation: "contrats_produits"
+            referencedColumns: ["contrat_id"]
+          },
+        ]
       }
     }
     Views: {
