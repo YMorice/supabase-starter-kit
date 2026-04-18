@@ -78,7 +78,7 @@ export default function ClientSearch({ variant }: Props) {
       >
         <Command
           shouldFilter={false}
-          className="bg-surface border border-border rounded-2xl overflow-hidden shadow-sm"
+          className="bg-surface border border-border rounded-2xl overflow-visible shadow-sm"
         >
           <div className={`flex items-center px-4 ${heightClass}`}>
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
