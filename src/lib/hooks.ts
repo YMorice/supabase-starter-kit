@@ -68,7 +68,7 @@ export function useClientSnapshots(clientId: string | null) {
   useEffect(() => {
     if (!clientId) return;
     const channel = supabase
-      .channel(`snapshots-${clientId}`)
+      .channel(`snapshots-${clientId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "client_snapshots", filter: `client_id=eq.${clientId}` },
@@ -106,7 +106,7 @@ export function useClientPrompts(clientId: string | null) {
   useEffect(() => {
     if (!clientId) return;
     const channel = supabase
-      .channel(`prompts-${clientId}`)
+      .channel(`prompts-${clientId}-${Math.random().toString(36).slice(2)}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "prompts", filter: `client_id=eq.${clientId}` },
