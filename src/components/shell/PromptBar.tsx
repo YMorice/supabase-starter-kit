@@ -14,6 +14,7 @@ export default function PromptBar() {
   const isPending = useUIStore((s) => s.isPromptPending);
   const setPending = useUIStore((s) => s.setPromptPending);
   const [value, setValue] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const qc = useQueryClient();
 
@@ -143,12 +144,31 @@ export default function PromptBar() {
 
         <button
           type="button"
-          onClick={() => console.log("voice input")}
+          onClick={() => setIsRecording((r) => !r)}
           disabled={isPending}
-          aria-label="Enregistrer un audio"
-          className="h-9 w-9 rounded-full bg-muted text-muted-foreground flex items-center justify-center hover:bg-muted/70 hover:text-foreground transition-colors shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+          aria-label={isRecording ? "Arrêter l'enregistrement" : "Enregistrer un audio"}
+          className={`relative h-9 w-9 rounded-full flex items-center justify-center transition-colors shrink-0 disabled:opacity-30 disabled:cursor-not-allowed ${
+            isRecording
+              ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              : "bg-muted text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+          }`}
         >
-          <Mic className="h-4 w-4" />
+          {isRecording && (
+            <>
+              <span className="absolute inset-0 rounded-full bg-destructive/40 animate-ping" />
+              <span className="absolute -inset-1 rounded-full border border-destructive/30 animate-pulse" />
+            </>
+          )}
+          {isRecording ? (
+            <span className="relative flex items-end gap-[2px] h-3.5">
+              <span className="w-[2px] bg-current rounded-full animate-[audio-bar_0.9s_ease-in-out_infinite] h-2" />
+              <span className="w-[2px] bg-current rounded-full animate-[audio-bar_0.9s_ease-in-out_infinite_0.15s] h-3.5" />
+              <span className="w-[2px] bg-current rounded-full animate-[audio-bar_0.9s_ease-in-out_infinite_0.3s] h-2.5" />
+              <span className="w-[2px] bg-current rounded-full animate-[audio-bar_0.9s_ease-in-out_infinite_0.45s] h-3" />
+            </span>
+          ) : (
+            <Mic className="h-4 w-4" />
+          )}
         </button>
 
         <button
