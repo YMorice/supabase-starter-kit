@@ -47,8 +47,8 @@ export default function AlertsPanel({ data }: Props) {
           Aucun signal d'attention détecté
         </div>
       ) : (
-        <ul className="flex flex-col gap-2 overflow-y-auto -mr-1 pr-1">
-          {alerts.slice(0, 4).map((a, i) => {
+        <ul className="flex flex-col gap-2">
+          {alerts.map((a, i) => {
             const s = severityStyles(a.severity);
             const Icon = s.icon;
             return (

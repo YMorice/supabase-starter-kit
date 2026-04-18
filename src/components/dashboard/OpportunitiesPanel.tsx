@@ -26,8 +26,8 @@ export default function OpportunitiesPanel({ data }: Props) {
           Client bien équipé, pas d'opportunité identifiée
         </div>
       ) : (
-        <ul className="flex flex-col gap-2 overflow-y-auto -mr-1 pr-1">
-          {items.slice(0, 4).map((o, i) => (
+        <ul className="flex flex-col gap-2">
+          {items.map((o, i) => (
             <li key={i}>
               <button
                 type="button"
