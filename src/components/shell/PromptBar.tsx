@@ -47,7 +47,7 @@ export default function PromptBar() {
       initial={{ y: 24, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="fixed left-1/2 -translate-x-1/2 bottom-6 z-40 w-[min(760px,calc(100%-32px))]"
+      className="fixed inset-x-0 bottom-6 z-40 mx-auto w-[min(760px,calc(100%-32px))]"
     >
       <div className="bg-surface/95 backdrop-blur-xl border border-border rounded-[28px] shadow-[0_8px_32px_-8px_rgba(0,0,0,0.18)] px-3 py-2.5 flex items-end gap-2">
         <Popover>
