@@ -7,7 +7,7 @@ export default function Header() {
   const setSelectedClient = useClientStore((s) => s.setSelectedClient);
 
   return (
-    <header className="h-16 bg-background flex items-center px-6 sticky top-0 z-30">
+    <header className="h-16 border-b border-border bg-surface flex items-center px-6 sticky top-0 z-30">
       {/* Left: wordmark */}
       <button
         onClick={() => setSelectedClient(null)}
@@ -15,7 +15,7 @@ export default function Header() {
         aria-label="Retour à l'accueil"
       >
         <img
-          src="https://vjecahooihxrofwmdbix.supabase.co/storage/v1/object/public/logo/logo-BNP-Paribas.jpg"
+          src="https://vjecahooihxrofwmdbix.supabase.co/storage/v1/object/public/logo/BNP.PA.png"
           alt="BNP Paribas"
           className="h-12 w-auto"
         />
@@ -23,13 +23,11 @@ export default function Header() {
 
       {/* Center: search slot (640px reserved) */}
       <div className="flex-1 flex justify-center">
-        <div className="w-[640px] max-w-full">
-          {selectedClientId && <ClientSearch variant="header" />}
-        </div>
+        <div className="w-[640px] max-w-full">{selectedClientId && <ClientSearch variant="header" />}</div>
       </div>
 
       {/* Right: avatar */}
-      <Avatar className="h-9 w-9">
+      <Avatar className="h-8 w-8 border border-border">
         <AvatarFallback className="bg-muted text-foreground text-xs font-medium">CN</AvatarFallback>
       </Avatar>
     </header>
